@@ -1,4 +1,4 @@
-#![feature(collections,exit_status,io,path)]
+#![feature(collections,exit_status,io)]
 
 extern crate getopts;
 extern crate tempdir;
@@ -47,7 +47,7 @@ pub fn grep(what: String, file: String, icase: bool) -> Result<bool, GrepError> 
         Ok(mut file) => {
             let mut content = String::new();
             match file.read_to_string(&mut content) {
-                Ok(()) => {
+                Ok(_) => {
                     let mut found = false;
                     let lines = content.split("\n");
                     for line in lines {
