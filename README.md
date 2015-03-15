@@ -1,4 +1,5 @@
-# coreutils-rust
+# coreutils-rust [![Build Status] (https://travis-ci.org/rgs1/coreutils-rust.svg?branch=master)](https://travis-ci.org/rgs1/coreutils-rust)
+
 A rewrite of coreutils in Rust (for fun, not prod)
 
 Note that there is a similar, much more advanced, project to rewrite coreutils here:
