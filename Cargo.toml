@@ -1,0 +1,12 @@
+[package]
+name = "coreutils-rust"
+version = "0.0.1"
+authors = ["Raul Gutierrez S. <rgs@itevenworks.net>"]
+
+[[bin]]
+name = "grep"
+path = "src/grep.rs"
+
+[dependencies]
+getopts = "*"
+tempdir = "*"
