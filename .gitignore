@@ -12,3 +12,6 @@
 
 # Even though we are building bins, lets ignore Cargo.loc
 Cargo.lock
+
+# Temp files
+*~
