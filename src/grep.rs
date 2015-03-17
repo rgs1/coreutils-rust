@@ -7,6 +7,7 @@ use getopts::Options;
 use std::fmt;
 use std::env;
 use std::fs::File;
+use std::io;
 use std::io::prelude::*;
 use std::path::Path;
 
@@ -42,36 +43,41 @@ pub fn grep(what: String, file: String, icase: bool) -> Result<bool, GrepError> 
         true => what.to_lowercase(),
         false => what
     };
-
-    match File::open(&path) {
-        Ok(mut file) => {
-            let mut content = String::new();
-            match file.read_to_string(&mut content) {
-                Ok(_) => {
-                    let mut found = false;
-                    let lines = content.split("\n");
-                    for line in lines {
-                        match line.find(&iwhat[..]) {
-                            Some(_) => {
-                                println!("{}", line);
-                                found = true;
-                            }
-                            _ => {}
-                        }
-                    }
-                    Ok(found)
-                },
-                Err(e) => {
-                    let gerror = GrepError::Read(format!("couldn't read: {:?}", e));
-                    Err(gerror)
-                }
+    let mut stream = if file == "-" {
+        Box::new(io::stdin()) as Box<Read>
+    } else {
+        match File::open(&path) {
+            Ok(fstream) => Box::new(fstream) as Box<Read>,
+            Err(e) => {
+                let gerror = GrepError::File(format!("couldn't open {}: {}", file, e));
+                return Err(gerror);
             }
-        },
+        }
+    };
+
+    // TODO: mmap()
+    let mut content = String::new();
+    match stream.read_to_string(&mut content) {
+        Ok(_) => {},
         Err(e) => {
-            let gerror = GrepError::File(format!("couldn't open {}: {}", file, e));
-            Err(gerror)
+            let gerror = GrepError::Read(format!("couldn't read: {:?}", e));
+            return Err(gerror);
         }
     }
+
+    // TODO: don't create lines[]
+    let mut found = false;
+    let lines = content.split("\n");
+    for line in lines {
+        match line.find(&iwhat[..]) {
+            Some(_) => {
+                println!("{}", line);
+                found = true;
+            }
+            _ => {}
+        }
+    }
+    Ok(found)
 }
 
 
@@ -99,7 +105,9 @@ fn main() {
 
     let icase = parsed.opt_present("ignore-case");
 
-    let (what, file) = if parsed.free.len() == 2 {
+    let (what, file) = if parsed.free.len() == 1 {
+        (parsed.free[0].clone(), "-".to_string())
+    } else if parsed.free.len() == 2 {
         (parsed.free[0].clone(), parsed.free[1].clone())
     } else {
         usage(&program[..], opts);
