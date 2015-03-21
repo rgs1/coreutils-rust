@@ -1,4 +1,4 @@
-#![feature(collections,exit_status,io)]
+#![feature(collections,exit_status)]
 
 extern crate getopts;
 extern crate tempdir;
